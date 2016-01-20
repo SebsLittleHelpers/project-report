@@ -1,4 +1,4 @@
-\documentclass{report}
+\documentclass{article}
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{amsmath}
@@ -46,22 +46,27 @@
 \date{\today}
 \maketitle
 
-\chapter{Introduction}
+\nocite{*}
+
+\section{Introduction}
 \input{introduction}
 
-\chapter{Scalameter for ScalaJS}
+\section{Scalameter for ScalaJS}
 \input{scalameterJS}
 
-\chapter{String$\_+$ constant folding}
+\section{String\_+ constant folding}
 \input{stringPlus}
 
-\chapter{Instance test optimisation}
+\section{Instance test optimisation}
 \input{instanceOf}
 
-\chapter{Constructor inline on effectively final classes}
+\section{Constructor inline on effectively final classes}
 \input{ctorInline}
 
-\chapter{Going further}
+\section{Going further}
 \input{conclusion}
+
+\bibliography{references}{}
+\bibliographystyle{plain}
 
 \end{document}
