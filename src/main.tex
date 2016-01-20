@@ -3,6 +3,8 @@
 \usepackage{float}
 \usepackage{amsmath}
 \usepackage{amsthm}
+\usepackage{listings}
+\usepackage{url}
 \usepackage{caption}
 \usepackage{algorithm}
 \usepackage{hyperref}
@@ -17,11 +19,22 @@
 \date{\today}
 \maketitle
 
-\tableofcontents
-
 \chapter{Introduction}
+\input{introduction}
+
 \chapter{Scalameter for ScalaJS}
+\input{scalameterJS}
+
 \chapter{String$\_+$ constant folding}
+\input{stringPlus}
+
 \chapter{Instance test optimisation}
+\input{instanceOf}
+
 \chapter{Constructor inline on effectively final classes}
+\input{ctorInline}
+
+\chapter{Going further}
+\input{conclusion}
+
 \end{document}
