@@ -3,4 +3,57 @@ optimisation, generated code file size and runtime performance, in this
 section, we summarise our findings for each of those aspects.
 
 \subsection{Generated code file size}
+  This was the easiest aspect to test. We looked at two different programs to
+make comparison. The first one is the historical Scala.js example programme:
+Reversi.scala which is a good example of a small but real world Scala.js app.
+And the second one is the Scala.js test suite which generates a huge JavaScript
+file and thus give us an example of how bigger programs would react.
+
+\subsubsection{Methodology}
+For each of the tested project we simply ran the sbt commands \emph{fastOptJS}
+and \emph{fullOptJS} successively and looked at the file of the created
+JavaScript files.
+
+\subsubsection{Measures}
+Figure \ref{fig:file_size} organise all the different file size measured in
+Bytes.
+
+\begin{figure}[H]
+  \centering
+  \begin{tabular}{ | r | c | c | c | c | }\hline
+    & \multicolumn{2}{|c|}{Reversi.scala} & \multicolumn{2}{|c|}{Scala.js
+testSuite}\\
+    & fastOpt & fullOpt & fastOpt & fullOpt\\ \hline
+    Current Scala.js master branch & 538'088 & 123'708 & 21'385'239 &
+4347723\\
+\hline \hline
+    Constructor inlining branch & 519'886 & 117'508 & 20'669'926 & 42'293'350\\
+\hline
+    Difference with master & -3.38\% & -5.01\% & -3.34\% & -2.72\%\\ \hline
+\hline
+    isInstanceOf branch & 0 & 0 & 0 & 0\\ \hline
+    Difference with master & 0 & 0 & 0 & 0\\ \hline
+  \end{tabular}
+  \captionsetup{justification=centering}
+  \caption{Generated JavaScript file size in Bytes for fullOpt or fastOpt with
+the size difference.}
+  \label{fig:file_size}
+\end{figure}
+
+\subsubsection{Observation}
+Both optimisation have a positive effect on the file size of the generated
+code. Where it seems logical for the constructor inlining it may seem
+strange at first for the isInstanceOf optimisation but as the ancestors field
+has been changed from a \emph{List[String]} to a \emph{List[Int]} it also make
+sense.
+
+
 \subsection{Runtime performance}
+Gathering valid and relevant data for this criteria was a bit harder than for
+the file size. As described 
+
+\subsubsection{Methodology}
+
+\subsubsection{Measures}
+
+\subsubsection{Observation}
