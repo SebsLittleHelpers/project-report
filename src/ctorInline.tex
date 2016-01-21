@@ -103,11 +103,12 @@ we have to check wether to call the constructor only or the "empty" constructor
 and then an "init" method.
 \end{itemize}
 
-\subsection{Complications \& restrictions}
+\subsection{Additional remarks}
 While implementing this optimisation we faced different issues which required
 restrictions or rethinking of our initial or intermediate solution. This
 section describe the nature of the problem and shows how we restricted or
 changed the implementation of our optimisation.
+
 \subsubsection{Hard-coded classes}
 Some of the Scala.js environment is specified in an hardcoded file named
 \emph{scalajsenv.js} (or an equivalent file for EcmaScript 6 Strong Mode) most
@@ -122,12 +123,33 @@ its call site was changed in the hardcoded file to match the optimised form.
 Optimising exported classes is problematic because it requires the code
 importing our class to have knowledge whether the class has been optimised or
 not. For this reason, we do not optimise exported classes.
+
 \subsubsection{EcmaScript 6 Strong Mode}
 Scala doesn't have any restriction regarding the instruction you can execute in
 a constructor whereas the specification for EcmaScript 6 Strong Mode only
 allows a limited set of instruction to be done inside a constructor. As such if
 the selected output mode is EcmaScript 6 Strong Mode then we never do the
 optimisation and keep the "init" method.
-\subsubsection{Incremental compiler}
-Caches! Invalidate caches while doing more caches :)
 
+\subsubsection{Incremental compiler}
+Last but not least, the naive implementation described above doesn't take into
+account the fact that the Scala.js compiler works in an incremental manner; a
+class/method will go through the full compiler pipeline only if it has been
+modified. But with the optimisation described above, we might optimise class A
+(taken from example \ref{lst:ctorOptScala}) in a run and then, during the next
+compile run our program might have a new class B extending our class A; which
+means we will no longer optimise the class A. This will break everything as all
+the statement where we instantiate the class A might be in a class/method where
+nothing has changed since the last run and as such the callsite to A
+constructor will not be changed back to the non-optimized version.
+To correct this issue we used the same idea that was already implemented on the
+\emph{OptimizerCore}: keep track of the methods each time they ask to know if a
+class uses the constructor optimisation. This is done through a new class: the
+\emph{IncClassEmitter}; it creates and control the ScalaJSClassEmitter and
+keeps the decision on whether or not a class uses the constructor optimisation
+while keeping a map of each classes have been asked about and a list of who
+asked. This enable us, at the beginning of each run, to compute the Set of
+classes for which their constructor optimisation changed (compared to the
+previous run) and then invalidate all methods who asked for a class that
+changed. Then we can proceed with the habitual progression of the compiler
+pipeline and all the code parts that needed an update will be reprocessed.
