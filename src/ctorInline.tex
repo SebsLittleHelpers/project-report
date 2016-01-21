@@ -1,8 +1,29 @@
 \subsection{Description of the optimisation}
-Scala allows for multiple constructors per classes which is not the case for JavaScript. Up until now, ScalaJS solved that problem by only having the JavaScript constructor initialize the class fields with the zero of their type and then have an "init" method per constructor which actually does what its corresponding Scala constructor does. This means that currently if you want to create an instance of type A the outputted JavaScript code will first create an instance of type A with the "empty" constructor and then call the init method on it. \\
-But in most cases, a Scala class doesn't have more than one constructor and if that class is effectively final (has no subclasses with instances), otherwise there would be issues in the subclasses with the call to the optimized parent constructor. In those cases, it would be possible to get rid of the init method and directly "inline" the Scala constructor instructions in the JavaScript constructor, right after initializing the field s with zeros of their type. This optimization would reduce the amount of code generated and reduce the number of method call executed thus improving both the file size and the running time. The code snippet \ref{lst:ctorOptScala} shows the Scala code for an optimizable class and an example of call site; code example \ref{lst:ctorOptJSNo} shows the current way of defining such class; finally, code snippet \ref{lst:ctorOptJS} shows the generated code we want to build when inlining the constructor. (these examples do not show all the generated JavaScript code, only the relevant parts)
-%TODO add code snippets to show the old and new way to proceed
-\begin{lstlisting}[language=scala,caption=Example Scala Code., label={lst:ctorOptScala}]
+Scala allows for multiple constructors per classes which is not the case for
+JavaScript. Up until now, ScalaJS solved that problem by only having the
+JavaScript constructor initialize the class fields with the zero of their type
+and then have an "init" method per constructor which actually does what its
+corresponding Scala constructor does. This means that currently if you want to
+create an instance of type A the outputted JavaScript code will first create an
+instance of type A with the "empty" constructor and then call the init method
+on it. \\
+But in most cases, a Scala class doesn't have more than one constructor and if
+that class is effectively final (has no subclasses with instances), otherwise
+there would be issues in the subclasses with the call to the optimized parent
+constructor. In those cases, it would be possible to get rid of the init method
+and directly "inline" the Scala constructor instructions in the JavaScript
+constructor, right after initializing the field s with zeros of their type.
+This optimization would reduce the amount of code generated and reduce the
+number of method call executed thus improving both the file size and the
+running time. The code snippet \ref{lst:ctorOptScala} shows the Scala code for
+an optimizable class and an example of call site; code example
+\ref{lst:ctorOptJSNo} shows the current way of defining such class; finally,
+code snippet \ref{lst:ctorOptJS} shows the generated code we want to build when
+inlining the constructor. (these examples do not show all the generated
+JavaScript code, only the relevant parts)
+
+\begin{lstlisting}[language=scala,caption=Example Scala Code.,
+label={lst:ctorOptScala}]
 class A(message: String) {
     def tell(): Unit = println(message)
 }
@@ -14,7 +35,8 @@ val someA = new A(someString)
 ...
 
 \end{lstlisting}
-\begin{lstlisting}[language=javascript,caption=Generated JavaScript without optimisation., label={lst:ctorOptJSNo}]
+\begin{lstlisting}[language=javascript,caption=Generated JavaScript without
+optimisation., label={lst:ctorOptJSNo}]
 /** @constructor */
 function $c_LA() {
   $c_O.call(this);
@@ -38,7 +60,8 @@ var someA = new $c_LA().init___T(someString);
 \end{lstlisting}
 %$
 
-\begin{lstlisting}[language=javascript,caption=Generated JavaScript with constructor optimisation., label={lst:ctorOptJS}]
+\begin{lstlisting}[language=javascript,caption=Generated JavaScript with
+constructor optimisation., label={lst:ctorOptJS}]
 /** @constructor */
 function $c_LA(message) {
   $c_O.call(this);
@@ -60,21 +83,51 @@ var someA = new $c_LA(someString);
 \end{lstlisting}
 
 \subsection{Implementation Details}
-This implies changes in the emitting phase, when the Compiler IR is desugared into JavaScript IR. The first step is to go through all classes and find those who only have one constructor, we count the methods of the class where their name is a constructor name (starting with "init\_\_\_"), and are effectively final, we look at the parent of each classes that has instances, those parent are not effectively final. This allows us to build a set with all the classes that uses the constructor Optimisation. Then we have to have a different behavior for the following point in code emitting:
+This implies changes in the emitting phase, when the Compiler IR is desugared
+into JavaScript IR. The first step is to go through all classes and find those
+who only have one constructor, we count the methods of the class where their
+name is a constructor name (starting with "init\_\_\_"), and are effectively
+final, we look at the parent of each classes that has instances, those parent
+are not effectively final. This allows us to build a set with all the classes
+that uses the constructor Optimisation. Then we have to have a different
+behavior for the following point in code emitting:
 \begin{itemize}
-    \item when building the constructor of a JS Class; if it uses the optimisation we have to fetch the "init" method from the methods of the class, change the parameter list and add the statement from the fetched method without its return statement as it is now part of the constructor.
-    \item when generating all the method code we have to filter out the "init" method which is no longer relevant and should not appear in the generated code.
-    \item when desugaring a function, each time we encounter a call site to a new we have to check wether to call the constructor only or the "empty" constructor and then an "init" method.
+\item when building the constructor of a JS Class; if it uses the optimisation
+we have to fetch the "init" method from the methods of the class, change the
+parameter list and add the statement from the fetched method without its return
+statement as it is now part of the constructor.
+\item when generating all the method code we have to filter out the "init"
+method which is no longer relevant and should not appear in the generated code.
+\item when desugaring a function, each time we encounter a call site to a new
+we have to check wether to call the constructor only or the "empty" constructor
+and then an "init" method.
 \end{itemize}
 
 \subsection{Complications \& restrictions}
-While implementing this optimisation we faced different issues which required restrictions or rethinking of our initial or intermediate solution. This section describe the nature of the problem and shows how we restricted or changed the implementation of our optimisation.
+While implementing this optimisation we faced different issues which required
+restrictions or rethinking of our initial or intermediate solution. This
+section describe the nature of the problem and shows how we restricted or
+changed the implementation of our optimisation.
 \subsubsection{Hard-coded classes}
-Some of the Scala.js environment is specified in an hardcoded file named \emph{scalajsenv.js} (or an equivalent file for EcmaScript 6 Strong Mode) most of the classes instantiated in that file (e.g. \emph{jl\_NullPointerException}) do not always have all their constructor present in the generated code, therefor they won't always be optimized and it is not possible to hardcode either version of the constructor call site. We chose to exclude those classes in the form of a blacklist when computing the set of classes which will be optimized. Only one class instantiated in that file was always optimized and its call site was changed in the hardcoded file to match the optimized form.
+Some of the Scala.js environment is specified in an hardcoded file named
+\emph{scalajsenv.js} (or an equivalent file for EcmaScript 6 Strong Mode) most
+of the classes instantiated in that file (e.g. \emph{jl\_NullPointerException})
+do not always have all their constructor present in the generated code,
+therefor they won't always be optimized and it is not possible to hardcode
+either version of the constructor call site. We chose to exclude those classes
+in the form of a blacklist when computing the set of classes which will be
+optimized. Only one class instantiated in that file was always optimized and
+its call site was changed in the hardcoded file to match the optimized form.
 \subsubsection{Exported classes}
-Optimizing exported classes is problematic because it requires the code importing our classe to have knowledge whether the class has been optimized or not. For this reason, we do not optimize exported classes.
+Optimizing exported classes is problematic because it requires the code
+importing our classe to have knowledge whether the class has been optimized or
+not. For this reason, we do not optimize exported classes.
 \subsubsection{EcmaScript 6 Strong Mode}
-Scala doesn't have any restriction regarding the instruction you can execute in a constructor whereas the specification for EcmaScript 6 Strong Mode only allows a limited set of instruction to be done inside a constructor. As such if the selected output mode is EcmaScript 6 Strong Mode then we never do the optimization and keep the "init" method.
+Scala doesn't have any restriction regarding the instruction you can execute in
+a constructor whereas the specification for EcmaScript 6 Strong Mode only
+allows a limited set of instruction to be done inside a constructor. As such if
+the selected output mode is EcmaScript 6 Strong Mode then we never do the
+optimization and keep the "init" method.
 \subsubsection{Incremental compiler}
 Caches! Invalidate caches while doing more caches :)
 
