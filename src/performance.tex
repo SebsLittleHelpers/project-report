@@ -19,40 +19,52 @@ and \emph{fullOptJS} successively and looked at the file of the created
 JavaScript files.
 
 \subsubsection{Measures}
-Figure \ref{fig:file_size} organise all the different file size measured in
+Figure \ref{fig:file_size} organises all the different file size measured in
 Bytes.
 
 \begin{figure}[H]
   \centering
-  \begin{tabular}{ | r | c | c | c | c | }\hline
+  \begin{tabular}{ | r | r | r | r | r | }\hline
     & \multicolumn{2}{|c|}{Reversi.scala} & \multicolumn{2}{|c|}{Scala.js
 testSuite}\\
     & fastOpt & fullOpt & fastOpt & fullOpt\\ \hline
-    Current Scala.js master branch & 538'088 & 123'708 & 21'385'239 &
-4347723\\
+    Current Scala.js master branch & 538'088B & 123'708B & 21'385'239B &
+4'347'723B\\
 \hline \hline
-    Constructor inlining branch & 519'886 & 117'508 & 20'669'926 & 42'293'350\\
+    Constructor inlining branch & 519'886B & 117'508B & 20'669'926B &
+4'229'335B\\
 \hline
     Difference with master & -3.38\% & -5.01\% & -3.34\% & -2.72\%\\ \hline
 \hline	
-    isInstanceOf branch (limit=0)& 501'495 & 120'046 & 21'078'724 & 4'381'011\\
+    isInstanceOf branch (limit=0)& 501'495B & 120'046B & 21'078'724B &
+4'381'011B\\
 \hline
     Difference with master & -6.80\% & -2.96\% & -1.43\% & +0.77\%\\ \hline
 \hline
-    isInstanceOf branch (limit=1)& 0 & 0 & 0 & 0\\ \hline
-    Difference with master & 0 & 0 & 0 & 0\\ \hline
+    isInstanceOf branch (limit=1)& 499'502B & 119'672B & 20'938'110B &
+4'368'699B\\
 \hline
-    isInstanceOf branch (limit=2)& 0 & 0 & 0 & 0\\ \hline
-    Difference with master & 0 & 0 & 0 & 0\\ \hline
+    Difference with master & -7.17\% & -3.26\% & -2.09\% & +0.48\%\\ \hline
 \hline
-    isInstanceOf branch (limit=3)& 0 & 0 & 0 & 0\\ \hline
-    Difference with master & 0 & 0 & 0 & 0\\ \hline
+    isInstanceOf branch (limit=2)& 499'249B & 119'560B & 20'933'279B &
+4'367'894B\\
 \hline
-    isInstanceOf branch (limit=4)& 0 & 0 & 0 & 0\\ \hline
-    Difference with master & 0 & 0 & 0 & 0\\ \hline
+    Difference with master & -7.22\% & -3.35\% & -2.11\% & +0.46\%\\ \hline
 \hline
-    isInstanceOf branch (limit=5)& 0 & 0 & 0 & 0\\ \hline
-    Difference with master & 0 & 0 & 0 & 0\\ \hline
+    isInstanceOf branch (limit=3)& 499'249B & 119'560B & 20'932'831B &
+4'367'461B\\
+\hline
+    Difference with master & -7.22\% & -3.35\% & -2.12\% & +0.45\%\\ \hline
+\hline
+    isInstanceOf branch (limit=4)& 499'318B & 119'492B & 20'932'940B &
+4'367'380B\\
+\hline
+    Difference with master & -7.21\% & -3.41\% & -2.12\% & +0.45\%\\ \hline
+\hline
+    isInstanceOf branch (limit=5)& 499'525B & 119'415B & 20'933'319B &
+4'367'029B\\
+\hline
+    Difference with master & -7.17\% & -3.47\% & -2.11\% & +0.44\%\\ \hline
     
   \end{tabular}
   \captionsetup{justification=centering}
@@ -81,9 +93,68 @@ measure the impact that our transformations had on the runtime performance.
 For the final classes optimisation, we created 3 * 1'000'000 object on every
 iteration of the test, whereas for the instanceOf optimisation, we perform
 roughly 8 * 1'000'000 membership tests for every iteration. We report our
-results in the table below.
+results in the tables below.
 
 
 \subsubsection{Measures}
 
+\begin{figure}[H]
+  \centering
+  \begin{tabular}{ | r | r | r | }\hline
+    & \multicolumn{2}{|c|}{Constructor Inlining} \\
+    & fastOpt & fullOpt \\ \hline
+    Current Scala.js master branch & 113 ms & 111.8 ms\\
+\hline \hline
+    Constructor inlining branch & 118 ms & 36.6 ms \\ \hline
+    Difference with master & +4.42\% & -67.26\%\\ \hline
+ \end{tabular}
+  \captionsetup{justification=centering}
+  \caption{Constructor inlining benchmark reported runtimes in millisecond for
+fullOpt or fastOpt with the performance difference.}
+  \label{fig:run_times_ctor}
+\end{figure}
+
+
+\begin{figure}[H]
+  \centering
+  \begin{tabular}{ | r | r | r | }\hline
+    & \multicolumn{2}{|c|}{isInstanceOf} \\
+    & fastOpt & fullOpt \\ \hline
+    Current Scala.js master branch & 229.7 ms & 112 ms \\
+\hline \hline	
+    isInstanceOf branch (limit=0)& 144.3 ms & N/A\\ \hline
+    Difference with master & -37.16\% & N/A\\ \hline
+\hline
+    isInstanceOf branch (limit=1)& 144 ms & N/A\\ \hline
+    Difference with master & -37.30\% & N/A\\ \hline
+\hline
+    isInstanceOf branch (limit=2)& 142 ms & N/A\\ \hline
+    Difference with master & -38.17\% & N/A\\ \hline
+\hline
+    isInstanceOf branch (limit=3)& 139 ms & N/A\\ \hline
+    Difference with master & -39.48\% & N/A\\ \hline
+\hline
+    isInstanceOf branch (limit=4)& 138.3 ms & N/A\\ \hline
+    Difference with master & -39.77\% & N/A\\ \hline
+\hline
+    isInstanceOf branch (limit=5)& 141 ms & N/A\\ \hline
+    Difference with master & -38.61\% & N/A\\ \hline
+     \end{tabular}
+  \captionsetup{justification=centering}
+  \caption{isInstanceOf benchmark reported runtimes in millisecond for fullOpt
+or fastOpt with the performance difference.}
+  \label{fig:run_times_instanceof}
+\end{figure}
+
+ 
 \subsubsection{Observation}
+The first thing that we notice is that there is not a great runtime performance
+improvement from the constructor inlining optimisation in fastOpt. However, it
+seems to have a tremendous improvement in fullOpt mode. This might be due to
+the fact that the code outputted by Scala.js becomes simpler, and thus easier
+for the Google Closure Compiler to optimize.\\
+We could unfortunately not test the runtime performance of the isInstanceOf
+optimisation in fullOpt due to a bug (most probably in the Google Closure
+Compiler). We can however already guess that a good value for $limit$ would be
+around 3 or 4. That is 3 or 4 comparisons before deciding to use an array of
+subtype relations.
