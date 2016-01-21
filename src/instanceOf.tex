@@ -1,0 +1,18 @@
+\subsection{Description of the optimisation}
+
+Scala, like most object oriented languages has a construct that allows
+programmatic membership tests. Idiomatic Scala depends heavily on this feature,
+especially though the use of pattern matching.
+
+The javascript virtual machine has support for membership test (the
+$instanceof$ operator), but it's behaviour is semantically different from
+Scala's $isInstanceOf[T]$ method, therefore forcing Scala.js to provide some
+runtime support.
+
+The current implementation relies on a field $\$classData$ present at
+runtime in the prototype of each class. This field contains among other things,
+information about the class' ancestors as well as weather it is an instance of
+the ArrayClass and it's depth. The ancestors field is a javascript object where
+the keys are the name of the ancestors and the values are all set to $1$, so
+that an instance test is just a lookup in the object to check whether the key
+is present. 
