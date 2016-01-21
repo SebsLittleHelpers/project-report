@@ -8,7 +8,7 @@ Scala's $isInstanceOf[T]$ method, therefore forcing Scala.js to provide some
 runtime support. \\
 The current implementation relies on a field $\$classData$ present at
 runtime in the prototype of each class. This field contains among other things,
-information about the class' ancestors as well as weather it is an instance of
+information about the class' ancestors as well as whether it is an instance of
 the ArrayClass and it's depth. The ancestors field is a JavaScript object where
 the keys are the name of the ancestors and the values are all set to $1$, so
 that an instance test is just a lookup in the object to check whether the key
@@ -23,8 +23,9 @@ function $is_F0(obj) {
 }
 
 \end{lstlisting}
-This can be quite slow for several reasons, the main on being that it needs to
-lookup fields in 2 objects ($ancestors$, and then $F0$).\\
+This can be quite slow for a few reasons, the main on being that it needs to
+lookup fields in a multimorphic object ($ancestors$) that will therefore
+be implemented as a HashMap.\\
 
 \subsection{Description of the optimisation}
 To improve the efficiency of the membership test, we assign a unique numerical
@@ -100,12 +101,13 @@ extend our previous implementation to accommodate array types by the following
 encoding of the $\$tagData$ field: The first bit is reserved to discriminate
 array types from other types, this makes it easy to check for array types as
 all of their tags are negatives. The next 8 bits are reserved for the depth of
-the array. This is sufficient since the maximum depth allowed for
-multidimensional arrays in JavaScript is 256. The 23 bits left are then
-used to encode the array's component type tag. This reduces the maximum number
-of compile-time types that we can encode to roughly 8 millions. However, since
-a high number of types also means a very large JavaScript program, reaching
-this limit is very unlikely before the program reaches a problematic size.
+the array. This is sufficient since the depth limitation for
+multidimensional arrays on the JVM, and thus in the Scala compiler is 256. The
+23 bits left are then used to encode the array's component type tag. This
+reduces the maximum number of compile-time types that we can encode to roughly
+8 millions. However, since a high number of types also means a very large
+JavaScript program, reaching this limit is very unlikely before the program
+reaches a problematic size.
 
 \subsubsection{Dynamic membership tests}
 Because the transformation presented above will not work for dynamic membership
