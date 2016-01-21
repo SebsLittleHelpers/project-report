@@ -90,10 +90,11 @@ transformations.
 \subsubsection{Methodology}
 We used the ScalaMeter framework, that we previously ported to Scala.js, to
 measure the impact that our transformations had on the runtime performance.
-For the final classes optimisation, we created 3 * 1'000'000 object on every
+For the final classes optimisation, we created 5 * 1'000'000 object on every
 iteration of the test, whereas for the instanceOf optimisation, we perform
 roughly 8 * 1'000'000 membership tests for every iteration. We report our
-results in the tables below.
+results in the tables \ref{fig:run_times_ctor} and
+\ref{fig:run_times_instanceof} below.
 
 
 \subsubsection{Measures}
@@ -151,8 +152,9 @@ or fastOpt with the performance difference.}
 The first thing that we notice is that there is not a great runtime performance
 improvement from the constructor inlining optimisation in fastOpt. However, it
 seems to have a tremendous improvement in fullOpt mode. This might be due to
-the fact that the code outputted by Scala.js becomes simpler, and thus easier
-for the Google Closure Compiler to optimize.\\
+the fact that the code outputted by Scala.js becomes simpler / closer to
+native JavaScript code, and thus easier for the Google Closure Compiler to
+optimize.\\
 We could unfortunately not test the runtime performance of the isInstanceOf
 optimisation in fullOpt due to a bug (most probably in the Google Closure
 Compiler). We can however already guess that a good value for $limit$ would be
