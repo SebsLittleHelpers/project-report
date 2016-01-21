@@ -1,0 +1,38 @@
+\subsection{Description}
+The first optimisation we were tasked to implement was constant folding for
+the binary operator \emph{+[string]}. which means replace \emph{+[string]}
+expression where both sides are literals (which could be any literal) into the
+value produced by that expression. E.g. if you have the following expression:
+\emph{"hello " + "world"}, you can transform it, at compile time, into its
+result: \emph{"hello world"}. This means you have one less \emph{+[string]}
+operation to do at runtime. It also reduces the code size by a few characters.
+\\
+There are a few other cases that can be optimised (the double arrow indicates
+the transformation done by our constant folding):
+\begin{itemize}
+  \item \emph{"" + (a: String) =\textgreater a}: if we add the empty String to
+any value typing to String then we can simply put the value itself.
+  \item \emph{(a + "hello ") + "world") =\textgreater a + "hello world"}: we
+can extract the two constant and "flatten" the \emph{+[string]} operation.
+  \item \emph{(a + "") + b) =\textgreater a +[string] b}: if the empty string
+is between two \emph{+[string]} we can remove it if we make sure the + operator
+of the new expression is a \emph{+[string]}.
+\end{itemize}
+
+
+\subsection{Additional remarks}
+In most cases the Scala.js compiler will run on the JVM and not bootstrapped in
+JavaScript, this introduces a slight issue as the JVM and EcmaScript do not
+have the same specifications regarding the String representation of numbers
+\cite{ES6}. Our first approach was to implement the EcmaScript specification in
+the \emph{OptimizerCore} but the code was huge for those relatively small
+cases, thus it was decided not to constant fold numeric literals which would
+require the use of that big specification function. \\
+In the mean time we had written unit tests for pretty much all cases of the
+EcmaScript specification algorithm and suddently the Scala.js testSuite was
+always failing when doing the fullOpt but succeeding in fastOpt. It was soon
+discovered that the Google Clojure Compiler, also running on the JVM and only
+used in the fullOpt mode, had a bug because it did constant folding (in the
+JVM) but did not follow the EcmaScript specification for printing numerics!
+An issue has been opened on the Clojure Compiler Project and has yet to be
+resolved despite a pull request of ours. \cite{googleBug}
