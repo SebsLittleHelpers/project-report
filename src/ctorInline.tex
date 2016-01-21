@@ -113,21 +113,21 @@ Some of the Scala.js environment is specified in an hardcoded file named
 \emph{scalajsenv.js} (or an equivalent file for EcmaScript 6 Strong Mode) most
 of the classes instantiated in that file (e.g. \emph{jl\_NullPointerException})
 do not always have all their constructor present in the generated code,
-therefor they won't always be optimized and it is not possible to hardcode
+therefor they won't always be optimised and it is not possible to hardcode
 either version of the constructor call site. We chose to exclude those classes
 in the form of a blacklist when computing the set of classes which will be
-optimized. Only one class instantiated in that file was always optimized and
-its call site was changed in the hardcoded file to match the optimized form.
+optimised. Only one class instantiated in that file was always optimised and
+its call site was changed in the hardcoded file to match the optimised form.
 \subsubsection{Exported classes}
-Optimizing exported classes is problematic because it requires the code
-importing our classe to have knowledge whether the class has been optimized or
-not. For this reason, we do not optimize exported classes.
+Optimising exported classes is problematic because it requires the code
+importing our class to have knowledge whether the class has been optimised or
+not. For this reason, we do not optimise exported classes.
 \subsubsection{EcmaScript 6 Strong Mode}
 Scala doesn't have any restriction regarding the instruction you can execute in
 a constructor whereas the specification for EcmaScript 6 Strong Mode only
 allows a limited set of instruction to be done inside a constructor. As such if
 the selected output mode is EcmaScript 6 Strong Mode then we never do the
-optimization and keep the "init" method.
+optimisation and keep the "init" method.
 \subsubsection{Incremental compiler}
 Caches! Invalidate caches while doing more caches :)
 
