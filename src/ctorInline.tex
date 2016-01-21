@@ -1,19 +1,20 @@
 \subsection{Description of the optimisation}
 Scala allows for multiple constructors per classes which is not the case for
 JavaScript. Up until now, Scala.js solved that problem by only having the
-JavaScript constructor initialize the class fields with the zero of their type
+JavaScript constructor initialise the class fields with the zero of their type
 and then have an "init" method per constructor which actually does what its
 corresponding Scala constructor does. This means that currently if you want to
 create an instance of type A the outputted JavaScript code will first create an
 instance of type A with the "empty" constructor and then call the init method
 on it. \\
-But in most cases, a Scala class doesn't have more than one constructor and if
-that class is effectively final (has no subclasses with instances), otherwise
-there would be issues in the subclasses with the call to the optimized parent
-constructor. In those cases, it would be possible to get rid of the init method
+But in most cases, a Scala class doesn't have more than one constructor. In
+those cases it would be possible to get rid of the init method
 and directly "inline" the Scala constructor instructions in the JavaScript
-constructor, right after initializing the field s with zeros of their type.
-This optimization would reduce the amount of code generated and reduce the
+constructor, right after initialising the fields with zeros of their type;
+but if and only if that class is effectively final (has no subclasses with
+instances), otherwise there would be issues in the subclasses with the call to
+the optimised parent constructor.
+This optimisation would reduce the amount of code generated and reduce the
 number of method call executed thus improving both the file size and the
 running time. The code snippet \ref{lst:ctorOptScala} shows the Scala code for
 an optimizable class and an example of call site; code example
@@ -47,7 +48,6 @@ function $c_LA() {
 
 $c_LA.prototype.init___T = (function(message) {
   this.message$2 = message;
-  $c_O.prototype.init___.call(this);
   return this
 });
 
@@ -58,7 +58,6 @@ var someA = new $c_LA().init___T(someString);
 ...
 
 \end{lstlisting}
-%$
 
 \begin{lstlisting}[language=javascript,caption=Generated JavaScript with
 constructor optimisation., label={lst:ctorOptJS}]
@@ -67,7 +66,6 @@ function $c_LA(message) {
   $c_O.call(this);
   this.message$2 = null;
   this.message$2 = message;
-  $c_O.prototype.init___.call(this);
 }
 
 /* Skipping prototype shenanigans ... */
@@ -90,7 +88,7 @@ name is a constructor name (starting with "init\_\_\_"), and are effectively
 final, we look at the parent of each classes that has instances, those parent
 are not effectively final. This allows us to build a set with all the classes
 that uses the constructor Optimisation. Then we have to have a different
-behavior for the following point in code emitting:
+behaviour for the following point in code emitting:
 \begin{itemize}
 \item when building the constructor of a JS Class; if it uses the optimisation
 we have to fetch the "init" method from the methods of the class, change the
