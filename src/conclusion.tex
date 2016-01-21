@@ -22,5 +22,5 @@ incrementality as it suffers from the same issues as the constructor inlining
 optimisation. There is also room for another big optimisation. Code generated
 from Scala tends to obtain most it's calls to $isInstanceOf$ from pattern
 matching. By detecting chains of if statement over $isInstanceOf$ calls in the
-optimiser, we could potentially rewrite them into native javascript $switch$
+optimiser, we could potentially rewrite them into native JavaScript $switch$
 statement over the object's tag, eliminating a large amount of method calls.

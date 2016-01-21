@@ -2,14 +2,14 @@
 Scala, like most object oriented languages has a construct that allows
 programmatic membership tests. Idiomatic Scala depends heavily on this feature,
 especially though the use of pattern matching.
-The javascript virtual machine has support for membership test (the
+The JavaScript virtual machine has support for membership test (the
 $instanceof$ operator), but it's behaviour is semantically different from
 Scala's $isInstanceOf[T]$ method, therefore forcing Scala.js to provide some
 runtime support. \\
 The current implementation relies on a field $\$classData$ present at
 runtime in the prototype of each class. This field contains among other things,
 information about the class' ancestors as well as weather it is an instance of
-the ArrayClass and it's depth. The ancestors field is a javascript object where
+the ArrayClass and it's depth. The ancestors field is a JavaScript object where
 the keys are the name of the ancestors and the values are all set to $1$, so
 that an instance test is just a lookup in the object to check whether the key
 is present. 
@@ -46,7 +46,7 @@ function $is_F0(obj) {
 
 \subsection{Further optimisations}
 The main problem with the previous implementation, is that it increases
-dramatically the size of the generated javascript program. To attenuate this
+dramatically the size of the generated JavaScript program. To attenuate this
 effect, we extend the Scala.js runtime support to include a
 $expandSubtypeArray$ function that will construct the array at runtime from a
 list of intervals.\\
@@ -101,10 +101,10 @@ encoding of the $\$tagData$ field: The first bit is reserved to discriminate
 array types from other types, this makes it easy to check for array types as
 all of their tags are negatives. The next 8 bits are reserved for the depth of
 the array. This is sufficient since the maximum depth allowed for
-multidimensional arrays in javascript is 256. The 23 bits left are then
+multidimensional arrays in JavaScript is 256. The 23 bits left are then
 used to encode the array's component type tag. This reduces the maximum number
 of compile-time types that we can encode to roughly 8 millions. However, since
-a high number of types also means a very large javascript program, reaching
+a high number of types also means a very large JavaScript program, reaching
 this limit is very unlikely before the program reaches a problematic size.
 
 \subsubsection{Dynamic membership tests}
