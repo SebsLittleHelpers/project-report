@@ -67,13 +67,22 @@ code. Where it seems logical for the constructor inlining it may seem
 strange at first for the isInstanceOf optimisation but as explained previously,
 the increase in size caused by the subtype arrays is counter balanced by the
 fact that we were able to change all of the ancestor fields from objects with
-long keys to packed arrays of ints.
+long string keys to packed arrays of ints.
 
 \subsection{Runtime performance}
 Gathering valid and relevant data for this criteria was a bit harder than for
-the file size. As described 
+the file size. As described in section \ref{scalameter}, it can be challenging
+to collect meaningful measures on runtime performace impact of code
+transformations.
 
 \subsubsection{Methodology}
+We used the ScalaMeter framework, that we previously ported to Scala.js, to
+measure the impact that our transformations had on the runtime performance.
+For the final classes optimisation, we created 3 * 1'000'000 object on every
+iteration of the test, whereas for the instanceOf optimisation, we perform
+roughly 8 * 1'000'000 membership tests for every iteration. We report our
+results in the table below.
+
 
 \subsubsection{Measures}
 
