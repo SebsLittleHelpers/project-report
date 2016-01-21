@@ -1,6 +1,10 @@
 As mentioned above there are two factors we want to minimise when doing
 optimisation, generated code file size and runtime performance, in this
-section, we summarise our findings for each of those aspects.
+section, we summarise our findings for each of those aspects. In the case of
+the membership test, we also try to find the optimal number of comparisons from
+which generating the subtype array is beneficial. This variable is represented
+by the $limit$ parameter, where a $limit$ of 0 corresponds to the case where we
+always generate the subtype array.
 
 \subsection{Generated code file size}
   This was the easiest aspect to test. We looked at two different programs to
@@ -30,9 +34,26 @@ testSuite}\\
     Constructor inlining branch & 519'886 & 117'508 & 20'669'926 & 42'293'350\\
 \hline
     Difference with master & -3.38\% & -5.01\% & -3.34\% & -2.72\%\\ \hline
+\hline	
+    isInstanceOf branch (limit=0)& 501'495 & 120'046 & 21'078'724 & 4'381'011\\
 \hline
-    isInstanceOf branch & 0 & 0 & 0 & 0\\ \hline
+    Difference with master & -6.80\% & -2.96\% & -1.43\% & +0.77\%\\ \hline
+\hline
+    isInstanceOf branch (limit=1)& 0 & 0 & 0 & 0\\ \hline
     Difference with master & 0 & 0 & 0 & 0\\ \hline
+\hline
+    isInstanceOf branch (limit=2)& 0 & 0 & 0 & 0\\ \hline
+    Difference with master & 0 & 0 & 0 & 0\\ \hline
+\hline
+    isInstanceOf branch (limit=3)& 0 & 0 & 0 & 0\\ \hline
+    Difference with master & 0 & 0 & 0 & 0\\ \hline
+\hline
+    isInstanceOf branch (limit=4)& 0 & 0 & 0 & 0\\ \hline
+    Difference with master & 0 & 0 & 0 & 0\\ \hline
+\hline
+    isInstanceOf branch (limit=5)& 0 & 0 & 0 & 0\\ \hline
+    Difference with master & 0 & 0 & 0 & 0\\ \hline
+    
   \end{tabular}
   \captionsetup{justification=centering}
   \caption{Generated JavaScript file size in Bytes for fullOpt or fastOpt with
@@ -43,10 +64,10 @@ the size difference.}
 \subsubsection{Observation}
 Both optimisation have a positive effect on the file size of the generated
 code. Where it seems logical for the constructor inlining it may seem
-strange at first for the isInstanceOf optimisation but as the ancestors field
-has been changed from a \emph{List[String]} to a \emph{List[Int]} it also make
-sense.
-
+strange at first for the isInstanceOf optimisation but as explained previously,
+the increase in size caused by the subtype arrays is counter balanced by the
+fact that we were able to change all of the ancestor fields from objects with
+long keys to packed arrays of ints.
 
 \subsection{Runtime performance}
 Gathering valid and relevant data for this criteria was a bit harder than for
