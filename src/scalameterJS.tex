@@ -1,0 +1,23 @@
+One of the main purposes of a compiler generating code instead of one having to
+write it by hand is that the compiler can perform a handful of code
+transformation and optimisation that would be near to impossible to perform by
+hand. Those optimisation can potentially increase performance and / or reduce
+the resulting code size. However, there may be many transformation possible at
+any given point in the compilation process and finding out which one have a
+real impact on the code can be cumbersome, especially when the effect is
+subtle.\\
+A great way to measure whether some code transformation is actually a valid
+optimisation is to benchmark the code against it's transformed version.
+This can however be challenging when the target platform is a virtual machine.
+Taking out of the picture all the variation caused by other program executing
+on the same machine, there will still be a great deal of variation in the
+measures performed due to the virtual machine itself. Garbage collection phases
+for example, might cause some very large outliers to appear in the data. In
+addition, most VM's perform advanced optimisation techniques (just in time
+compilation, inlining, dynamic compilation) that cause the performance to
+improve over time. \\
+There already exist a few benchmarking tools for javascript virtual machines,
+however most of them do not take those variations into account, which renders
+them useless for measuring running times in the order of milliseconds. For this
+reason, our first task in this project was to port the ScalaMeter framework (a
+benchmarking framework for the JVM) so that it could compile with Scala.js.
